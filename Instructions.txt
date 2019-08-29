@@ -1,0 +1,101 @@
+These Csound programs take 2 audio files and convolve them.
+
+Convolution is a mathematical process where each sound is read
+through another sound. Sound1 is read through Sound2. This is
+mathematically equivalent to reading Sound2 through Sound1.
+
+How to use:
+
+1. Make sure Csound is installed and running correctly on your
+computer.
+
+2. Copy your soundfiles into this directory and rename them
+"sound1.wav" and "sound2.wav". See note below if either is not
+a wav file.
+
+3. Open a command line (Windows) or a terminal (Unix, Mac).
+
+4. Navigate to this directory using the "cd" command. E.g.:
+      >cd Downloads
+      >cd convolve
+
+5. Now run the following command if the files are stereo:
+csound stereo.csd -oomacro:AMP=XX -odac
+You will hear the result played through your soundcard.
+Replace the XX with an amplitude factor. Because the result of
+convolution can be very loud or very soft depending on various
+qualities of the input files, this macro flag allows you to
+adjust the amplitude level of the input files. You can start
+with XX=1, which will probably result in a sound that is too soft
+to hear (unless your input files are long). The messages output
+by Csound include a report of "overall amps" a few lines from
+the end. You can check this to see what level your result is.
+0db, or the maximum possible amplitude before clipping, is
+32768. I have built in a limiter so output values will never
+exceed 32768 anyway, to keep your speakers and ears safe.
+If you see overall amps = 32768 in the output log, your file
+probably clipped, so try again with a lower XX (you will also
+hear a very loud distorted sound, of course). If you hear no
+sound and see a low "overall amps" value (like under 1000), try
+again with a higher XX. The output volume is proportional to XX
+so doubling the value of XX should double the amplitude of your
+result (note that this is not equivalent to doubling the dB).
+For very long input sounds you may need XX to be much smaller
+than 1 before the result is soft enough to avoid clipping.
+
+6. Once you are satisfied with the sound of the result and the
+amplitude level, you can save the result to disk as a soundfile
+by running this command:
+csound stereo.csd --omacro:AMP=XX
+Notice that this is the same command as before but with the -odac
+flag removed. Now Csound will output to a soundfile instead of
+outputting to your speakers. The result will be written to a
+soundfile called "test.wav" (in this directory). If "test.wav"
+does not exist it will be created. If it already exists it will
+be overwritten completely, so make sure to rename your output
+files before running the program again, or you may lose your work!
+Of course, use the same "XX" factor that you did before, so that
+the result is identical.
+
+7. Consider using the output as the input and convolving again!
+Whenever the csound stereo.csd command is run, csound will
+convolve the files named "sound1.wav" and "sound2.wav", so to try
+out different sounds, just rename the files as needed.
+
+NOTES:
+
+* stereo.csd may not work properly if either sound is mono, it is
+expecteing mono sounds.
+
+* mono.csd works exactly the same, but it accepts mono files and
+outputs a mono result. If mono.csd is run and either soundfile is
+stereo, only the left channel of audio will be used from that file.
+To use mono.csd, follow the steps above but replace stereo.csd with
+mono.csd in the command. For example:
+csound mono.csd -odac --omacro:AMP=20
+will convolve sound1.wav with sound2.wav, using an amplitude
+factor of 20 and sending the result to the soundcard.
+
+* Sample rate matters: this csound program is written to operate
+at a sample rate of 44100 Hz. sound1.wav is used in a way
+that automatically adjusts if there are differences between
+Csound's sample rate versus the sample rate of the file. So,
+sound1.wav can be any sample rate and the user need not worry.
+This is NOT true for sound2.wav which is used in the convolution
+step. if sound2.wav is not a 44.1kHz file, it will be read at
+the incorrect speed. So use a 44.1kHz file unless you want the
+sound warped.
+
+* When csound loads the soundfiles in, there is a maximum size.
+That is 524288 sample frames or about 11.9 seconds of audio (at
+44.1kHz). Shorter files will just have silence appended on the
+end. Longer files will be truncated at the end. This maximum can
+be adjusted. To do so, open the .csd files with a text editor.
+Scroll down to the lines that looks like this:
+f 1 0 [524288] 1 "sound1.wav" 0 0 1
+f 2 0 [524288] 1 "sound2.wav" 0 0 1
+Change 524288 to another value to change the maximum length. You
+MUST use a power of 2. 524288 is (2^19). You could use [524288*2]
+to double the maximum file length. 
+
+Created by Vincent Patalano. 2019.
